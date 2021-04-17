@@ -15,7 +15,7 @@ typedef void (*ListenCBFunc)(int sock, struct sockaddr* addr, int socklen, void*
 class COM_API msServerTask : public XTask
 {
 public:
-	// ½ÓÊÜ¿Í»§¶ËµÄÁ¬½Ó
+	// ï¿½ï¿½ï¿½Ü¿Í»ï¿½ï¿½Ëµï¿½ï¿½ï¿½ï¿½ï¿½
 	virtual bool Init();
 	ListenCBFunc ListenCB = 0;
 	void set_server_port(int port) { this->server_port_ = port; }
@@ -25,4 +25,4 @@ private:
 };
 
 
-#endif // !1
+#endif // MSSERVERTASK_H

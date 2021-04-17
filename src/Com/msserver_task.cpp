@@ -36,15 +36,15 @@ bool msServerTask::Init()
         (sockaddr*)&sin,
         sizeof(sin)
     );
-
     if (!evc)
     {
-        cout << "listen port" << server_port_ << "failed!";
+        cout << "listen port" << server_port_ << "failed!" << endl;
         return false;
     }
     else
     {
-        cout << "listen port" << server_port_ << "success!";
+        cout << "listen port" << server_port_ << "success!" << endl;
+        return true;
     }
 
     // 设置回调函数
