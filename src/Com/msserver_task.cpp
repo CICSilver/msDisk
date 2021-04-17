@@ -2,6 +2,7 @@
 #include <event2/event.h>
 #include <event2/listener.h>
 #include <iostream>
+#include <string.h>
 using namespace std;
 static void SListenCB(struct evconnlistener* evc, evutil_socket_t client_socket, struct sockaddr* addr, int socklen, void *arg)
 {
