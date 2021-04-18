@@ -1,7 +1,11 @@
 #include "xtools.h"
-
 #ifdef  _WIN32
 #include <io.h>
+#else
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <dirent.h>
+#include <unistd.h>
 #endif //  _WIN32
 
 using namespace std;
@@ -9,19 +13,19 @@ COM_API string GetDirData(string path)
 {
 	string data = "";
 #ifdef _WIN32
-	// 存储文件信息
+	// 锟芥储锟侥硷拷锟斤拷息
 	_finddata_t file;
 	string dirpath = path + "/*.*";
-	// 目录上下文
+	// 目录锟斤拷锟斤拷锟斤拷
 	intptr_t dir = _findfirst(dirpath.c_str(), &file);
 	if (dir < 0)
 	{
 		return data;
 	}
-	// 目录不为空
+	// 目录锟斤拷为锟斤拷
 	do
 	{
-		// 不处理子目录
+		// 锟斤拷锟斤拷锟斤拷锟斤拷目录
 		if (file.attrib & _A_SUBDIR) continue;
 		char buf[1024] = { 0 };
 		sprintf_s(buf, "%s,%u;", file.name, file.size);
@@ -30,9 +34,28 @@ COM_API string GetDirData(string path)
 
 
 #else
+	const char *dir = path.c_str();
+	DIR *dp = 0;
+	struct dirent *entry = 0;
+	struct stat statbuf;
+	dp = opendir(dir);
+	if(dp == NULL) 
+	{
+		return data;
+	}
+	chdir(dir);
+	char buf[1024] = { 0 };
+	while((entry = readdir(dp)) != NULL)
+	{
+		lstat(entry->d_name, &statbuf);
+		if(S_ISDIR(statbuf.st_mode))
+			continue;
+		sprintf(buf, "%s, %ld;", entry->d_name, statbuf.st_size);
+		data += buf;
+	}
 #endif // _WIN32
 
-	// 去除正文末尾的分号
+	// 去锟斤拷锟斤拷锟斤拷末尾锟侥分猴拷
 	if (!data.empty())
 	{
 		data = data.substr(0, data.size() - 1);
