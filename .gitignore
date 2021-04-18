@@ -7,5 +7,7 @@ msdisk_gui/
 out/
 .vs/
 garb/
-*/Debug/
-*.o
+src/Com/*.o
+src/Com/*.so
+src/msdisk_gui/*.o
+src/msdisk_gui/*.so
