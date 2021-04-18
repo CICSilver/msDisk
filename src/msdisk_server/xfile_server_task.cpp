@@ -1,6 +1,7 @@
 #include "xfile_server_task.h"
 #include "xtools.h"
 #include <iostream>
+#include <string.h>
 using namespace std;
 string XFileServerTask::cur_dir_ = "./";
 std::mutex XFileServerTask::cur_dir_mux_;
@@ -86,7 +87,11 @@ void XFileServerTask::Download(const XMsg* msg)
     //回复消息 MSG_DOWNLOAD_ACCEPT
     char buf[32] = { 0 };
     //_CRT_SECURE_NO_WARNINGS
+    #ifdef _WIN32
     sprintf_s(buf, "%d", filesize_);
+    #else
+    sprintf(buf, "%d", filesize_);
+    #endif
     XMsg resmsg;
     resmsg.type = MSG_DOWNLOAD_ACCEPT;
     resmsg.size = strlen(buf) + 1; // +1发送\0
