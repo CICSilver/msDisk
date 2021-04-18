@@ -4,24 +4,23 @@
 #include <iostream>
 #include <string.h>
 using namespace std;
-static void SListenCB(struct evconnlistener* evc, evutil_socket_t client_socket, struct sockaddr* addr, int socklen, void *arg)
+static void SListenCB(struct evconnlistener* evc, evutil_socket_t client_socket, struct sockaddr* client_addr, int socklen, void* arg)
 {
     cout << "SListenCB" << endl;
-    auto task = (msServerTask *)arg;
+    auto task = (msServerTask*)arg;
     if (task->ListenCB)
-    {
-        task->ListenCB(client_socket, addr, socklen, arg);
-    }
+        task->ListenCB(client_socket, client_addr, socklen, arg);
     else
     {
-        cerr << "no callback function" << endl;
+        cerr << "please set callback function ListenCB" << endl;
     }
+
 }
 bool msServerTask::Init()
 {
     if (server_port_ <= 0)
     {
-        cerr << "MsServerTask::Init failed! server_port_ hasnt been set!";
+        cerr << "XServerTask::Init failed! server_port_ is not set" << endl;
         return false;
     }
     //监听端口
@@ -38,15 +37,9 @@ bool msServerTask::Init()
     );
     if (!evc)
     {
-        cout << "listen port" << server_port_ << "failed!" << endl;
+        cout << "listen port " << server_port_ << " failed!" << endl;
         return false;
     }
-    else
-    {
-        cout << "listen port" << server_port_ << "success!" << endl;
-        return true;
-    }
-
-    // 设置回调函数
-    return false;
+    cout << "listen port " << server_port_ << " success!" << endl;
+    return true;
 }
