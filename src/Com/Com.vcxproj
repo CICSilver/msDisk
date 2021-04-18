@@ -161,15 +161,19 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="msserver_task.h" />
+    <ClInclude Include="xcom_task.h" />
+    <ClInclude Include="xmsg.h" />
     <ClInclude Include="xtask.h" />
     <ClInclude Include="xthread.h" />
     <ClInclude Include="xthread_pool.h" />
+    <ClInclude Include="xtools.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="makefile" />
     <ClCompile Include="msserver_task.cpp" />
+    <ClCompile Include="xcom_task.cpp" />
     <ClCompile Include="xthread.cpp" />
     <ClCompile Include="xthread_pool.cpp" />
+    <ClCompile Include="xtools.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

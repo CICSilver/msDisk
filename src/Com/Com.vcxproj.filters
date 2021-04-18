@@ -30,6 +30,15 @@
     <ClInclude Include="msserver_task.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="xcom_task.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="xmsg.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="xtools.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="xthread.cpp">
@@ -41,7 +50,10 @@
     <ClCompile Include="msserver_task.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="makefile">
+    <ClCompile Include="xcom_task.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="xtools.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

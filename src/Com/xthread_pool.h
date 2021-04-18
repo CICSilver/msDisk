@@ -7,7 +7,7 @@
 #else
 #define COM_API __declspec(dllimport)
 #endif
-#else 
+#else
 #define COM_API
 #endif
 #include <vector>

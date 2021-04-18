@@ -148,6 +148,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="msdisk_server.cpp" />
+    <ClCompile Include="xfile_server_task.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="xfile_server_task.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

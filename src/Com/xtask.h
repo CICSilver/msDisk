@@ -1,6 +1,17 @@
 #ifndef XTASK_H
 #define XTASK_H
-class XTask
+
+#ifdef _WIN32
+#ifdef COM_EXPORTS
+#define COM_API __declspec(dllexport)
+#else
+#define COM_API __declspec(dllimport)
+#endif
+#else
+#define COM_API
+#endif
+
+class COM_API XTask
 {
 public:
 

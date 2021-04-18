@@ -10,6 +10,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "msdisk_server", "msdisk_ser
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Com", "..\Com\Com.vcxproj", "{D927E303-A542-4F65-8E7A-5FC83556215D}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "msdisk_gui", "..\msdisk_gui\msdisk_gui.vcxproj", "{82DEE29D-21EB-4401-B67F-F2A85A15DBD7}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D927E303-A542-4F65-8E7A-5FC83556215D} = {D927E303-A542-4F65-8E7A-5FC83556215D}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -34,6 +39,12 @@ Global
 		{D927E303-A542-4F65-8E7A-5FC83556215D}.Release|x64.Build.0 = Release|x64
 		{D927E303-A542-4F65-8E7A-5FC83556215D}.Release|x86.ActiveCfg = Release|Win32
 		{D927E303-A542-4F65-8E7A-5FC83556215D}.Release|x86.Build.0 = Release|Win32
+		{82DEE29D-21EB-4401-B67F-F2A85A15DBD7}.Debug|x64.ActiveCfg = Debug|Win32
+		{82DEE29D-21EB-4401-B67F-F2A85A15DBD7}.Debug|x86.ActiveCfg = Debug|Win32
+		{82DEE29D-21EB-4401-B67F-F2A85A15DBD7}.Debug|x86.Build.0 = Debug|Win32
+		{82DEE29D-21EB-4401-B67F-F2A85A15DBD7}.Release|x64.ActiveCfg = Release|Win32
+		{82DEE29D-21EB-4401-B67F-F2A85A15DBD7}.Release|x86.ActiveCfg = Release|Win32
+		{82DEE29D-21EB-4401-B67F-F2A85A15DBD7}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -123,6 +123,11 @@ bool XThread::Setup()
 void XThread::Main()
 {
 	cout << id << " XThread::Main() begin" << endl;
+	if (!base_)
+	{
+		cerr << "XThread::Main() failed! base_ is null" << endl;
+		cerr << "in socket setup WSAStartup(MAKEWORD(2, 2), &wsa)" << endl;
+	}
 	event_base_dispatch(base_);
 	event_base_free(base_);
 

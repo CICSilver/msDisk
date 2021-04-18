@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DEFECTS>
+  <DEFECT>
+    <SFA>
+      <FILEPATH>I:\c_workspace\msDisk\src\com\</FILEPATH>
+      <FILENAME>xmsg.h</FILENAME>
+      <LINE>29</LINE>
+      <COLUMN>0</COLUMN>
+    </SFA>
+    <DEFECTCODE>26495</DEFECTCODE>
+    <DESCRIPTION>未初始化变量 XMsgHead::type。始终初始化成员变量(type.6)。</DESCRIPTION>
+    <FUNCTION>XMsgHead::{ctor}</FUNCTION>
+    <DECORATED>??0XMsgHead@@QAE@XZ</DECORATED>
+    <FUNCLINE>29</FUNCLINE>
+    <ADDITIONALINFO>
+      <targetSymbol>XMsgHead::type</targetSymbol>
+    </ADDITIONALINFO>
+    <PATH></PATH>
+  </DEFECT>
+</DEFECTS>

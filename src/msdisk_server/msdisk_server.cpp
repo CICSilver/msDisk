@@ -1,6 +1,7 @@
 #include <iostream>
 #include "xthread_pool.h"
 #include "msserver_task.h"
+#include "xfile_server_task.h"
 #include <thread>
 #ifdef _WIN32
 #include <windows.h>
@@ -11,7 +12,11 @@ using namespace std;
 
 static void ListenCB(int sock, struct sockaddr* addr, int socklen, void* arg)
 {
+	auto task = new XFileServerTask();
+	task->set_sock(sock);
+	XThreadPool::Get()->Dispatch(task);
 	cout << "ListenCB in main" << endl;
+
 }
 
 int main(int argc, char* argv[])
@@ -38,7 +43,6 @@ int main(int argc, char* argv[])
 	{
 		cout << "msdisk_server port thread_count" << endl;
 	}
-
 	// 初始化主线程池
 	XThreadPool::Get()->Init(thread_count);
 
@@ -48,6 +52,7 @@ int main(int argc, char* argv[])
 	task->set_server_port(server_port);
 	task->ListenCB = ListenCB;
 	server_pool.Dispatch(task);
+
 
 	for (;;)
 	{
