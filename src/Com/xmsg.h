@@ -10,29 +10,39 @@
 #else
 #define COM_API
 #endif
+
 enum MsgType
 {
-	MSG_NONE     = 0,
-	MSG_GETDIR	 = 1,	//< 请求目录
-	MSG_DIRLIST  = 2,	//< 返回目录列表
-	MSG_MAX_TYPE = 3,	//< 验证类型是否正确
-};
+    MSG_NONE = 0,
+    MSG_GETDIR,             //请求目录
+    MSG_DIRLIST,            //返回目录列表
+    MSG_UPLOAD_INFO,        //请求上传文件
+    MSG_UPLOAD_ACCEPT,      //服务端准备好接收文件
+    MSG_UPLOAD_COMPLETE,    //服务端接收文件结束
+    MSG_DOWNLOAD_INFO,      //请求下载文件
+    MSG_DOWNLOAD_ACCEPT,    //开始发送数据给客户端
+    MSG_DOWNLOAD_COMPLETE,  //客户端下载成功
 
-// 消息最大字节数
+
+
+    MSG_MAX_TYPE,       //用来验证类型正确
+
+};
+//消息最大字节数
 #define MSG_MAX_SIZE 1000000
 
-// 消息头
+//消息头
 struct COM_API XMsgHead
 {
-	MsgType type;
-	int size = 0;
+    MsgType type;
+    int size = 0;
 };
-
-//假定消息全部包含内容，否则发送OK
-struct COM_API XMsg : public XMsgHead
+//约定每个消息必须包含内容，没有内容使用OK
+struct COM_API XMsg :public XMsgHead
 {
-	char* data = 0;		//< 存储消息正文
-	int recved = 0;		//< 已经接受的消息字节数
+    char *data = 0;     //存储消息内容
+    int recved = 0;     //已经接收的消息字节数
+
 };
 
-#endif // ! XMSG_H
+#endif

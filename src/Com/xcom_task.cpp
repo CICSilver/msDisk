@@ -5,49 +5,170 @@
 #include <string.h>
 using namespace std;
 
-static void SReadCB(struct bufferevent* bev, void* ctx)
+
+static void SReadCB(struct bufferevent *bev, void *ctx)
 {
     auto task = (XComTask*)ctx;
     task->ReadCB();
 }
-static void SWriteCB(struct bufferevent* bev, void* ctx)
-{
-
-}
-static void SEventCB(struct bufferevent* bev, short what, void* ctx)
+static void SWriteCB(struct bufferevent *bev, void *ctx)
 {
     auto task = (XComTask*)ctx;
-    // ï¿½Õµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È½ï¿½ï¿½ï¿½ï¿½ì³£ï¿½Ð¶ï¿½
+    task->WriteCB();
+}
+
+static void SEventCB(struct bufferevent *bev, short what,void *ctx)
+{
+    auto task = (XComTask*)ctx;
     task->EventCB(what);
     
 }
+void XComTask::Close()
+{
+    if(bev_)
+        bufferevent_free(bev_);
+    bev_ = NULL;
+    if(msg_.data)
+        delete msg_.data;
+    memset(&msg_, 0, sizeof(msg_));
+    delete this;
+}
+bool  XComTask::Write(const void *data, int size)
+{
+    if (!bev_  || !data || size <= 0)return false;
+    int re = bufferevent_write(bev_, data, size);
+    if (re != 0)return false;
+    return true;
+}
+bool XComTask::Write(const XMsg *msg)
+{
+    if (!bev_ || !msg || !msg->data || msg->size <= 0)return false;
+    //1 Ð´ÈëÏûÏ¢Í·
+    int re = bufferevent_write(bev_, msg, sizeof(XMsgHead));
+    if (re != 0)return false;
+    //2 Ð´ÈëÏûÏ¢ÄÚÈÝ
+    re = bufferevent_write(bev_, msg->data, msg->size);
+    if (re != 0)return false;
+    return true;
+}
+//¼¤»îÐ´Èë»Øµ÷
+void XComTask::BeginWrite()
+{
+    if (!bev_)return;
+    bufferevent_trigger(bev_, EV_WRITE, 0);
+}
+//bool XComTask::ReadCB(const XMsg *msg)
+//{
+//    cout << "recv Msg type=" << msg->type << " size=" << msg->size << endl;
+//    return true;
+//}
+void XComTask::ReadCB()
+{
+    
+    for (;;)//È·±£±ßÔµ´¥·¢ÊÇÄÜ¶ÁÈ¡ËùÓÐÊý¾Ý
+    {
+        if (!is_recv_msg_)
+        {
+            int len = bufferevent_read(bev_, read_buf_, sizeof(read_buf_));
+            if (len <= 0)return;
+            ReadCB(read_buf_, len);
+            continue;
+        }
+        // ½ÓÊÕÏûÏ¢XMsgHead
+        //1 ½ÓÊÕÍ·²¿ÐÅÏ¢
+        if (!msg_.data)
+        {
+            int headsize = sizeof(XMsgHead);
+            int len = bufferevent_read(bev_, &msg_,headsize);
+            if (len <= 0)return;
+            if (len != headsize)
+            {
+                cerr << "msg head recv error" << endl;
+                return;
+            }
+            //ÑéÖ¤ÏûÏ¢Í·µÄÓÐÐ§ÐÔ
+            if (msg_.type >= MSG_MAX_TYPE || msg_.size <= 0 || msg_.size> MSG_MAX_SIZE)
+            {
+                cerr << "msg head is error" << endl;
+                return;
+            }
+            msg_.data = new char[msg_.size];
+        }
+        int readsize = msg_.size - msg_.recved;
+        if (readsize <= 0)
+        {
+            delete msg_.data;
+            memset(&msg_, 0, sizeof(msg_));
+            return;
+        }
+        int len = bufferevent_read(bev_, msg_.data+ msg_.recved, readsize);
+        if (len <= 0)
+            return;
+        msg_.recved += len;
+        if (msg_.recved == msg_.size)
+        {
+            //´¦ÀíÏûÏ¢
+            cout << "recved msg " << msg_.size << endl;
+            //Èç¹ûÔÚÆäÖÐÇåÀíÁËbev_ÉõÖÁ¶ÔÏó
+            if (!ReadCB(&msg_))
+            {
+                return;
+            }
+            delete msg_.data;
+            memset(&msg_, 0, sizeof(msg_));
+         
+        }
+    }
+}
+
+void XComTask::EventCB(short what)
+{
+    cout << "SEventCB:" << what << endl;
+    if (what & BEV_EVENT_CONNECTED)
+    {
+        cout << "BEV_EVENT_CONNECTED" << endl;
+        //Í¨ÖªÁ¬½Ó³É¹¦
+
+        ConnectedCB();
+    }
+
+    ///ÍË³öÒª´¦Àí»º³åÄÚÈÝ
+    if (what & BEV_EVENT_ERROR || what & BEV_EVENT_TIMEOUT)
+    {
+        cout << "BEV_EVENT_ERROR or BEV_EVENT_TIMEOUT" << endl;
+        Close();
+    }
+    if (what & BEV_EVENT_EOF)
+    {
+        cout << "BEV_EVENT_EOF" << endl;
+        Close();
+    }
+}
 bool XComTask::Init()
 {
-    // ï¿½ï¿½ï¿½Ö¿Í»ï¿½ï¿½ËºÍ·ï¿½ï¿½ï¿½ï¿½
-    int sock = this->sock();
-    if (sock <= 0)
-    {
-        sock = -1;
-    }
-    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, socketï¿½ï¿½ï¿½ï¿½-1ï¿½ï¿½ï¿½Ô¶ï¿½ï¿½ï¿½ï¿½ï¿½
-    this->bev_ = bufferevent_socket_new(base(), sock, BEV_OPT_CLOSE_ON_FREE);
+    //Çø·Ö·þÎñ¶Ë»¹ÊÇ¿Í»§¶Ë
+    int comsock = this->sock();
+    if (comsock <= 0)
+        comsock = -1;
+    ///ÓÃbufferevent ½¨Á¢Á¬½Ó 
+    /// ´´½¨buffereventÉÏÏÂÎÄ -1×Ô¶¯´´½¨socket
+    bev_ = bufferevent_socket_new(base(), comsock, BEV_OPT_CLOSE_ON_FREE);
     if (!bev_)
     {
-        cerr << "bufferevent_socket_new" << endl;
+        cerr << "bufferevent_socket_new failed!" << endl;
+        return false;
     }
 
-    // ï¿½ï¿½ï¿½Ã»Øµï¿½ï¿½ï¿½ï¿½ï¿½
+    //ÉèÖÃ»Øµ÷º¯Êý
     bufferevent_setcb(bev_, SReadCB, SWriteCB, SEventCB, this);
-    bufferevent_enable(bev_, EV_READ | EV_WRITE);
+    bufferevent_enable(bev_, EV_READ|EV_WRITE);
 
-    // ï¿½ï¿½ï¿½Ã³ï¿½Ê±Ê±ï¿½ï¿½
     timeval tv = { 10,0 };
     bufferevent_set_timeouts(bev_, &tv, &tv);
 
-    // ï¿½ï¿½ï¿½Ó·ï¿½ï¿½ï¿½ï¿½ï¿½
+    //Á¬½Ó·þÎñÆ÷
     if (server_ip_.empty())
     {
-        // ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ipï¿½ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½buffereventï¿½ï¿½ï¿½ï¿½Ö´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         return true;
     }
     sockaddr_in sin;
@@ -55,115 +176,8 @@ bool XComTask::Init()
     sin.sin_family = AF_INET;
     sin.sin_port = htons(server_port_);
     evutil_inet_pton(AF_INET, server_ip_.c_str(), &sin.sin_addr.s_addr);
-    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-    int ret = bufferevent_socket_connect(bev_, (sockaddr*)&sin, sizeof(sin));
-
-    if (ret != 0)
-    {
+    int re = bufferevent_socket_connect(bev_, (sockaddr*)&sin, sizeof(sin));
+    if (re != 0)
         return false;
-    }
-
-    return false;
-}
-
-void XComTask::EventCB(short what)
-{
-    // ï¿½Ð¶ï¿½ï¿½Ç·ï¿½ï¿½ï¿½ï¿½Ó³É¹ï¿½
-    if (what & BEV_EVENT_CONNECTED)
-    {
-        cout << "BEV_EVENT_CONNECTED" << endl;
-        ConnectedCB();
-    }
-    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-    if (what & BEV_EVENT_ERROR || what & BEV_EVENT_TIMEOUT)
-    {
-        cout << "BEV_EVENT_ERROR or BEV_EVENT_TIMEOUT" << endl;
-
-        bufferevent_free(bev_);
-    }
-    // ï¿½ï¿½ï¿½Ó¶Ï¿ï¿½ï¿½ï¿½ï¿½ï¿½ (×¢ï¿½â»ºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)
-    if (what & BEV_EVENT_EOF)
-    {
-
-    }
-}
-
-bool XComTask::Write(const XMsg* msg)
-{
-    if (!bev_ || !msg || !msg->data || msg->size <= 0)
-    {
-        return false;
-    }
-    // Ð´ï¿½ï¿½Ï¢Í·
-    int ret = bufferevent_write(bev_, msg, sizeof(XMsgHead));
-    if (ret != 0)
-    {
-        return false;
-    }
-    // Ð´ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½ï¿½
-    ret = bufferevent_write(bev_, msg->data, msg->size);
-    if (ret != 0)
-    {
-        return false;
-    }
-
     return true;
-}
-
-void XComTask::ReadCB(const XMsg* msg)
-{
-    cout << "recv Msg type : " << msg->type << ", " 
-        << "msg size : " << msg->size << endl;
-}
-
-void XComTask::ReadCB()
-{
-    for (;;)     //< ï¿½ï¿½Ö¹ï¿½ï¿½Ôµï¿½ï¿½ï¿½ï¿½Ê±ï¿½Þ·ï¿½È«ï¿½ï¿½ï¿½ï¿½È¡
-    {
-        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢Í·ï¿½ï¿½ï¿½ï¿½È¡ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½ÍºÍ³ï¿½ï¿½ï¿½   
-        if (!msg_.data)
-        {
-            int headSize = sizeof(XMsgHead);
-            int len = bufferevent_read(bev_, &msg_, headSize);
-            if (len <= 0)
-            {
-                // ï¿½ï¿½Ò»ï¿½ï¿½Ñ­ï¿½ï¿½ï¿½Ñ¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½È¡ï¿½ï¿½ï¿½Ë³ï¿½
-                return;
-            }
-            if (len != headSize)
-            {
-                cerr << "msg head recv error" << endl;
-                return;
-            }
-            // ï¿½ï¿½Ö¤ï¿½ï¿½Ï¢Í·ï¿½Ç·ï¿½ï¿½ï¿½Ð§
-            if (msg_.type >= MSG_MAX_TYPE || msg_.size <= 0 || msg_.size > MSG_MAX_SIZE)
-            {
-                cerr << "msg head invalid" << endl;
-                return;
-            }
-            msg_.data = new char[msg_.size];
-        }
-        int readSize = msg_.size - msg_.recved;
-        if (readSize <= 0)
-        {
-            // ï¿½Ñ½ï¿½ï¿½Üµï¿½ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½ï¿½ï¿½Ü³ï¿½ï¿½È£ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½Ê½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-            delete msg_.data;
-            memset(&msg_, 0, sizeof(msg_));
-            return;
-        }
-        int len = bufferevent_read(bev_, msg_.data + msg_.recved, msg_.size);
-        if (len <= 0)
-        {
-            return;
-        }
-        msg_.recved += len;
-        if (msg_.recved == msg_.size)
-        {
-            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½ï¿½
-            cout << "recved msg" << msg_.size << endl;
-            ReadCB(&msg_);
-            delete msg_.data;
-            memset(&msg_, 0, sizeof(msg_));
-        }
-    }
 }

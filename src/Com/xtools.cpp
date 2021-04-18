@@ -1,64 +1,55 @@
 #include "xtools.h"
-#ifdef  _WIN32
+#ifdef _WIN32
 #include <io.h>
 #else
 #include <sys/types.h>
-#include <sys/stat.h>
 #include <dirent.h>
 #include <unistd.h>
-#endif //  _WIN32
-
+#include <sys/stat.h>
+#endif
 using namespace std;
-COM_API string GetDirData(string path)
+COM_API std::string GetDirData(std::string path)
 {
-	string data = "";
+    string data = "";
 #ifdef _WIN32
-	// ï¿½æ´¢ï¿½Ä¼ï¿½ï¿½ï¿½Ï¢
-	_finddata_t file;
-	string dirpath = path + "/*.*";
-	// Ä¿Â¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-	intptr_t dir = _findfirst(dirpath.c_str(), &file);
-	if (dir < 0)
-	{
-		return data;
-	}
-	// Ä¿Â¼ï¿½ï¿½Îªï¿½ï¿½
-	do
-	{
-		// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¿Â¼
-		if (file.attrib & _A_SUBDIR) continue;
-		char buf[1024] = { 0 };
-		sprintf_s(buf, "%s,%u;", file.name, file.size);
-		data += buf;
-	} while (_findnext(dir, &file) == 0);
-
-
+    //´æ´¢ÎÄ¼þÐÅÏ¢
+    _finddata_t file;
+    string dirpath = path + "/*.*";
+    //Ä¿Â¼ÉÏÏÂÎÄ
+    intptr_t dir = _findfirst(dirpath.c_str(), &file);
+    if (dir < 0)
+        return data;
+    do
+    {
+        if (file.attrib & _A_SUBDIR) continue;
+        char buf[1024] = { 0 };
+        sprintf_s(buf, "%s,%u;", file.name, file.size);
+        data += buf;
+    } while (_findnext(dir, &file) == 0);
 #else
-	const char *dir = path.c_str();
-	DIR *dp = 0;
-	struct dirent *entry = 0;
-	struct stat statbuf;
-	dp = opendir(dir);
-	if(dp == NULL) 
-	{
-		return data;
-	}
-	chdir(dir);
-	char buf[1024] = { 0 };
-	while((entry = readdir(dp)) != NULL)
-	{
-		lstat(entry->d_name, &statbuf);
-		if(S_ISDIR(statbuf.st_mode))
-			continue;
-		sprintf(buf, "%s, %ld;", entry->d_name, statbuf.st_size);
-		data += buf;
-	}
-#endif // _WIN32
-
-	// È¥ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä©Î²ï¿½Ä·Öºï¿½
-	if (!data.empty())
-	{
-		data = data.substr(0, data.size() - 1);
-	}
-	return data;
+    const char *dir = path.c_str();
+    DIR *dp = 0;
+    struct dirent *entry = 0;
+    struct stat statbuf;
+    dp = opendir(dir);
+    if(dp == NULL)
+	    return data;
+    chdir(dir);
+    char buf[1024] = {0};
+    while((entry = readdir(dp))!=NULL)
+    {
+	    lstat(entry->d_name,&statbuf);
+	    if(S_ISDIR(statbuf.st_mode))continue;
+	    sprintf(buf,"%s,%ld;",entry->d_name,statbuf.st_size);
+	    data += buf;
+    }
+#endif
+    //È¥µô½áÎ² ;
+    if (!data.empty())
+    {
+        data = data.substr(0, data.size() - 1);
+    }
+    return data;
 }
+
+

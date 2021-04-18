@@ -32,6 +32,5 @@ private:
     int sock_ = 0;
     int thread_id_ = 0;
 
-
 };
 #endif
