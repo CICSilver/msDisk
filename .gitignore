@@ -7,3 +7,5 @@ msdisk_gui/
 out/
 .vs/
 garb/
+*/Debug/
+*.o

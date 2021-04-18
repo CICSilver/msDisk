@@ -1,10 +1,10 @@
 i:\c_workspace\msdisk\src\com\debug\vc142.pdb
 i:\c_workspace\msdisk\src\com\debug\vc142.idb
+i:\c_workspace\msdisk\src\com\debug\xtools.obj
 i:\c_workspace\msdisk\src\com\debug\xthread_pool.obj
 i:\c_workspace\msdisk\src\com\debug\xthread.obj
 i:\c_workspace\msdisk\src\com\debug\xcom_task.obj
 i:\c_workspace\msdisk\src\com\debug\msserver_task.obj
-i:\c_workspace\msdisk\src\com\debug\xtools.obj
 i:\c_workspace\msdisk\out\lib\com_debug.lib
 i:\c_workspace\msdisk\out\lib\com_debug.exp
 i:\c_workspace\msdisk\out\bin\com_debug.dll
@@ -15,7 +15,6 @@ i:\c_workspace\msdisk\src\com\debug\com.tlog\cl.command.1.tlog
 i:\c_workspace\msdisk\src\com\debug\com.tlog\cl.read.1.tlog
 i:\c_workspace\msdisk\src\com\debug\com.tlog\cl.write.1.tlog
 i:\c_workspace\msdisk\src\com\debug\com.tlog\com.write.1u.tlog
-i:\c_workspace\msdisk\src\com\debug\com.tlog\link.14316.delete.1.tlog
 i:\c_workspace\msdisk\src\com\debug\com.tlog\link.command.1.tlog
 i:\c_workspace\msdisk\src\com\debug\com.tlog\link.read.1.tlog
 i:\c_workspace\msdisk\src\com\debug\com.tlog\link.write.1.tlog
